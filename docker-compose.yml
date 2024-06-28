@@ -1,0 +1,32 @@
+# define a versao docker
+version: '3.8'
+ 
+services:
+  # Define um servico chamado mysql
+  mysql:
+    image: mysql:8.0 # defina a imagem do docker a ser usada
+    container_name: mysql_database # nome do container
+    ports:
+      - "3307:3306" #define a porta 3307 pro host e a porta 3306 para o container 
+    restart: always # Configura o contêiner para sempre reiniciar se ele parar por qualquer motivo.
+    environment: #variaveis do ambiente
+      MYSQL_ROOT_PASSWORD: root 
+      MYSQL_DATABASE: dbsmartshop
+      MYSQL_USER: smartshop
+      MYSQL_PASSWORD: root
+    command: --default-authentication-plugin=mysql_native_password
+    volumes:
+      - ./back-end/src/main/resources/scripts:/docker-entrypoint-initdb.d
+# Serviço para a sua aplicação Java
+  java_app:
+    build: ./back-end #Especifica que a imagem Docker será construída a partir do diretório ./back-end
+    ports:
+      - "8080:8080" # mapeia as portas do host e da aplicação
+    depends_on:
+      - mysql
+  angular_app:  
+    build: ./Frontend
+    ports:
+      - "4200:4200" # mapeia as portas 
+    depends_on:
+      - java_app
